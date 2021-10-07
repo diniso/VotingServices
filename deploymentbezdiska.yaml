@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+  authenticationDatabase:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_TCP_PORT=3307
+    networks:
+      - databaseAuthentificationNetwork
+  izboriDatabase:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - databaseNetwork
+  redis:
+    image: redis
+    networks:
+      - redisNetwork
+  authenfiticationimage:
+    image: authentificationimage
+    networks:
+      - databaseAuthentificationNetwork
+    environment:
+      - DATABASE_URL_AUTHENTIFICATION=authenticationDatabase:3307
+    ports:
+    - 5000:5000
+  migration:
+    image: migrationimage
+    environment:
+      - DATABASE_URL=izboriDatabase
+    networks:
+      - databaseNetwork
+  migrationAuthentification:
+    image: migrationimageauthentification
+    environment:
+      - DATABASE_URL_AUTHENTIFICATION=authenticationDatabase:3307
+    networks:
+      - databaseAuthentificationNetwork
+  electionAdmin:
+    image: electionimageadmin
+    environment:
+      - DATABASE_URL=izboriDatabase
+      - mytimezone=2
+    networks:
+      - databaseNetwork
+    ports:
+    - 5001:5001
+  electionZvanicnik:
+    image: electionimagezvanicnik
+    environment:
+      - DATABASE_URL=izboriDatabase
+      - REDIS_URL=redis
+    networks:
+      - databaseNetwork
+      - redisNetwork
+    ports:
+      - 5002:5002
+  readingvotes:
+    image: readingvotesimage
+    environment:
+      - DATABASE_URL=izboriDatabase
+      - REDIS_URL=redis
+      - mytimezone=2
+    networks:
+      - databaseNetwork
+      - redisNetwork
+
+networks:
+  databaseAuthentificationNetwork:
+  databaseNetwork:
+  redisNetwork:
